@@ -1,7 +1,37 @@
 name: Release
 
-# Tag push (v10.0, v10.1, ...) -> pack + upload to CurseForge / GitHub Releases
+# Packager release type (CurseForge), from BigWigs release.sh:
+#   1) Untagged commits → alpha
+#   2) Tagged: tag contains "alpha" → alpha; "beta" → beta; else → release
+#
+# Manual: Actions → Release → Run workflow
+#   bump:          release | patch | hotfix   (version numbers)
+#   release_type:  alpha | beta | release    (CurseForge file type)
+#
+# Version shape: 10.0  (hotfix omitted) → 10.0.1 only when hotfix bumped
+# Tag push (v10.0, v10.0-beta, ...) still packs without bumping
 on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump
+        type: choice
+        required: true
+        default: patch
+        options:
+          - release
+          - patch
+          - hotfix
+      release_type:
+        description: CurseForge release type (alpha / beta / release)
+        type: choice
+        required: true
+        default: alpha
+        options:
+          - alpha
+          - beta
+          - release
+
   push:
     tags:
       - "v*"
@@ -11,13 +41,86 @@ permissions:
 
 jobs:
   release:
+    # Skip duplicate run when this workflow pushes a tag after a manual release.
+    if: github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: BigWigsMods/packager@v2
+      - name: Bump version, update TOCs, tag
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          BUMP: ${{ inputs.bump }}
+          RELEASE_TYPE: ${{ inputs.release_type }}
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Base version from latest v* tag, else TOC (strip v / -alpha / -beta).
+          base="$(git tag -l 'v*' --sort=-v:refname | sed 's/^v//' | sed -E 's/[-+].*$//' | head -n1 || true)"
+          if [ -z "$base" ]; then
+            base="$(grep -m1 '^## Version:' WhoaUnitFrames.toc | sed 's/^## Version:[[:space:]]*//' | sed -E 's/[-+].*$//')"
+          fi
+          if [ -z "$base" ]; then
+            echo "Could not determine current version from tags or TOC"
+            exit 1
+          fi
+
+          release="$(echo "$base" | awk -F. '{print $1+0}')"
+          patch="$(echo "$base" | awk -F. '{print ($2 == "" ? 0 : $2+0)}')"
+          hotfix="$(echo "$base" | awk -F. '{print ($3 == "" ? 0 : $3+0)}')"
+          echo "Current version parts: release=$release patch=$patch hotfix=$hotfix"
+
+          case "$BUMP" in
+            release) release=$((release + 1)); patch=0; hotfix=0 ;;
+            patch)   patch=$((patch + 1)); hotfix=0 ;;
+            hotfix)  hotfix=$((hotfix + 1)) ;;
+            *) echo "Unknown bump: $BUMP"; exit 1 ;;
+          esac
+
+          # Omit .hotfix when 0 → 10.0 not 10.0.0
+          if [ "$hotfix" -gt 0 ]; then
+            ver="${release}.${patch}.${hotfix}"
+          else
+            ver="${release}.${patch}"
+          fi
+
+          # Packager: tag text controls CurseForge type (alpha/beta/release).
+          case "$RELEASE_TYPE" in
+            alpha) tag_ver="${ver}-alpha" ;;
+            beta)  tag_ver="${ver}-beta" ;;
+            release) tag_ver="$ver" ;;
+            *) echo "Unknown release type: $RELEASE_TYPE"; exit 1 ;;
+          esac
+
+          tag="v${tag_ver}"
+          echo "New version: $ver  tag: $tag  curse type: $RELEASE_TYPE"
+
+          for toc in WhoaUnitFrames.toc WhoaUnitFrames_*.toc; do
+            [ -f "$toc" ] || continue
+            sed -i -E "s/^## Version:.*/## Version: ${ver}/" "$toc"
+          done
+
+          git add WhoaUnitFrames.toc WhoaUnitFrames_*.toc
+          git commit -m "chore: bump version to ${ver}"
+          git tag -a "$tag" -m "$tag"
+
+          echo "PUSH_TAG=$tag" >> "$GITHUB_ENV"
+          echo "PUSH_BRANCH=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
+
+      - name: Package and upload
+        uses: BigWigsMods/packager@v2
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push version commit and tag
+        if: github.event_name == 'workflow_dispatch' && env.PUSH_TAG != ''
+        run: |
+          set -euo pipefail
+          git push origin "HEAD:${PUSH_BRANCH}"
+          git push origin "refs/tags/${PUSH_TAG}"

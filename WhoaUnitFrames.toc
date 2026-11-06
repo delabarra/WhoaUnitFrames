@@ -2,7 +2,7 @@
 ## Title: Whoa Unit Frames
 ## Notes: Classic unit frames. Type |cff00ff00/whoaui|r to open options.
 ## OptionalDeps: Blizzard_SocialToast, Blizzard_ChatFrame, Blizzard_EditMode, Blizzard_SpellDiminishUI, DevTools
-## Author: Whoa
+## Author: delabarra
 ## Version: 10.0
 ## X-Curse-Project-ID: 102099
 ## Category: Unit Frames
