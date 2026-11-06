@@ -7,8 +7,8 @@
 /docs/
 /tools/
 
-# Pack output
-/release/
+# Local BigWigs packager output
+/.release/
 
 # Python / PyInstaller build debris
 __pycache__/

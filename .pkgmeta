@@ -1,0 +1,10 @@
+package-as: WhoaUnitFrames
+
+ignore:
+  - .cursor
+  - .github
+  - docs
+  - reference
+  - tools
+  - .gitattributes
+  - .gitignore

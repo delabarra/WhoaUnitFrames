@@ -4,6 +4,7 @@
 ## OptionalDeps: Blizzard_SocialToast, Blizzard_ChatFrame
 ## Author: Whoa
 ## Version: 10.0
+## X-Curse-Project-ID: 102099
 ## Category: Unit Frames
 ## SavedVariables: WhoaUFDB
 ## DefaultState: enabled
