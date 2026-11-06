@@ -62,7 +62,7 @@ local defaults = {
 	-- Used when classColor and/or npcColor is "chromatic".
 	healthColorCycleSpeed = 4,
 	statusBarTexture = "blizzard",
-	statusBarFont = "classic",
+	statusBarFont = "retail",
 	-- Health/power number capping: "whoa" | "numbers" (AbbreviateNumbers) | "large" (AbbreviateLargeNumbers).
 	-- Mainline defaults to "numbers": "whoa" uses Lua math and falls back to AbbreviateNumbers on secrets.
 	numberAbbreviation = IS_MAINLINE and "numbers" or "whoa",

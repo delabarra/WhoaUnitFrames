@@ -1031,7 +1031,7 @@ function WhoaUF:RegisterOptions()
 		db,
 		Settings.VarType.String,
 		"Number font",
-		"classic"
+		"retail"
 	)
 	statusBarFontSetting:SetValueChangedCallback(function()
 		if self.ApplyStatusBarFonts then

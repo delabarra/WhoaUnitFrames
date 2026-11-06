@@ -262,7 +262,7 @@ local function NormalizeStatusBarFontKey(key)
 	if STATUSBAR_FONT_PRESETS[key] then
 		return key
 	end
-	return "classic"
+	return "retail"
 end
 
 local function InvalidateStatusBarFontCache()
@@ -309,7 +309,7 @@ function WhoaUF:GetStatusBarFontOptions()
 end
 
 function WhoaUF:GetStatusBarFontTextOffset()
-	if NormalizeStatusBarFontKey(GetOption("statusBarFont", "classic")) == "mono" then
+	if NormalizeStatusBarFontKey(GetOption("statusBarFont", "retail")) == "mono" then
 		return -1
 	end
 	return 0
@@ -329,7 +329,7 @@ local function GetStatusBarFontPath(face)
 end
 
 local function GetStatusBarFontPreset()
-	local key = NormalizeStatusBarFontKey(GetOption("statusBarFont", "classic"))
+	local key = NormalizeStatusBarFontKey(GetOption("statusBarFont", "retail"))
 	local preset = STATUSBAR_FONT_PRESETS[key]
 	if cachedStatusBarFontKey == key and cachedStatusBarFontPath then
 		return key, cachedStatusBarFontPath, preset
