@@ -1,0 +1,44 @@
+---
+description: How to use local Blizzard UI source as the API and behavior reference
+alwaysApply: true
+---
+
+# Blizzard Interface Reference
+
+This repo ships Blizzard UI source under `reference/`. Prefer it over web docs or guesswork for WoW UI APIs, frame templates, events, and unit-frame behavior.
+
+Live client dumps on this machine (read-only, not product code):
+
+- Live retail: `g:\Blizzard Games\World of Warcraft\_retail_\BlizzardInterfaceCode`
+- PTR (xptr): `g:\Blizzard Games\World of Warcraft\_xptr_\BlizzardInterfaceCode`
+
+Retail and PTR Interface trees **differ** (e.g. PTR has `UnitFrameUtil` / 12.1.5 AuraContainer APIs; live retail may not). Prefer the dump that matches the **build you are targeting**. Do not assume a symbol in PTR exists on live Mainline.
+
+## Search order
+
+1. **Unit-frame packages** (start here for almost all WhoaUnitFrames work):
+   - `reference/Blizzard_UnitFrame`
+   - `reference/Blizzard_CompactRaidFrames`
+   - `reference/Blizzard_RaidFrame`
+   - `reference/Blizzard_CUFProfiles`
+   - `reference/Blizzard_SharedXMLGame`
+2. **Full interface tree** only if the answer is not in those packages:
+   - `reference/BlizzardInterfaceCode`
+3. **Live client dump** when `reference/` is stale for that build (`_retail_` vs `_xptr_`)
+
+## Version folders
+
+Addon targets live clients in `WhoaUnitFrames.toc` (Vanilla / TBC Anniversary / Mists / Mainline). When a package has flavor folders (`Classic`, `Vanilla`, `Wrath`, `Cata`, `Mists`, `Shared`, `Mainline`):
+
+- Prefer `Classic` / era folders that match the live TOC, plus `Shared`
+- Use Wrath/Cata (or other) era folders only as historical reference when live Classic/Shared lack the symbol — those clients are not shipping targets
+- Avoid `Mainline`-only APIs unless intentionally supporting retail/PTR
+- Within Mainline, gate build-specific APIs by capability / Interface version (see whoa-unitframes rule: retail vs PTR)
+
+## How to use reference code
+
+- Read Blizzard `.lua` / `.xml` to learn real APIs, templates, and call patterns
+- Mirror secure/taint-safe patterns (combat lockdown, unit tokens, attribute-driven frames) on **Whoa frames only**
+- Do **not** copy Blizzard files wholesale into the addon
+- Default Blizzard frames: **hide + mute events/OnUpdate** (via `Blizzard_Classic.lua` / `Blizzard_Mainline.lua`; Mainline conceals with alpha + mouse instead of Hide/reparent); never skin or rework them — build Whoa replacements instead
+- Cite the reference path when explaining behavior (e.g. `reference/Blizzard_UnitFrame/Classic/...`, or `_xptr_\...\UnitFrameUtil.lua`)

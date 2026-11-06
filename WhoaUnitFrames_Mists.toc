@@ -1,0 +1,64 @@
+## Interface: 50504
+## Title: Whoa Unit Frames
+## Notes: Classic unit frames. Type |cff00ff00/whoaui|r to open options.
+## OptionalDeps: Blizzard_SocialToast, Blizzard_ChatFrame
+## Author: Whoa
+## Version: 10.0
+## Category: Unit Frames
+## SavedVariables: WhoaUFDB
+## DefaultState: enabled
+
+# Core
+Core\WhoaUnitFrames.lua
+Core\Util.lua
+Core\Timing.lua
+Core\Toast.lua
+Core\Toast.xml
+Core\StatusText.lua
+Core\Blizzard_Classic.lua
+Core\EditMode_Classic.lua
+Core\ClassBars.lua
+Core\EventBus.lua
+Core\Appearance.lua
+Core\SpellbarArt_Classic.lua
+
+# Frames
+Frames\StatusBarAnim.lua
+Frames\HealPrediction_Classic.lua
+Frames\ManaTickGlow.lua
+Frames\PowerTickGlow.lua
+Frames\SwingTickGlow.lua
+Frames\StatusBarAnim.xml
+Frames\UnitFrameClassic.xml
+Frames\UnitFrameState.lua
+Frames\UnitFrameShared.lua
+Frames\UnitFrameUpdate.lua
+Frames\UnitFrameEvents.lua
+Frames\UnitFrameCombatFlush.lua
+Frames\UnitFrame.lua
+Frames\DkPlayerArt.lua
+Frames\Auras.xml
+Frames\Auras.lua
+Frames\Threat.lua
+Frames\CastBar_Classic.lua
+Frames\ComboPoints.lua
+Frames\Pet.lua
+Frames\Party.lua
+Frames\Boss.lua
+Frames\RaidGroup.lua
+
+# Class power (MoP: monks, shadow orbs, warlock fury/embers)
+ClassPower\ClassPower.xml
+ClassPower\Runes.lua
+ClassPower\PaladinPowerBar.lua
+ClassPower\ShardBar.lua
+ClassPower\WarlockPower.lua
+ClassPower\EclipseBar.lua
+ClassPower\PriestBar.lua
+ClassPower\MonkHarmonyBar.lua
+ClassPower\MonkStaggerBar.lua
+ClassPower\AlternateManaBar.lua
+ClassPower\Totems.lua
+ClassPower\RogueComboPointBar.lua
+
+Options.lua

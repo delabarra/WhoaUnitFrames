@@ -1,0 +1,124 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+	<!--
+		Player status-bar animations (Classic targeting-frame art).
+		Reference: reference/BlizzardInterfaceCode_11.2.7/.../BuilderSpenderFrame.xml
+		  + Classic UnitFrame AnimatedHealthLossMixin / FeedbackFrame / FullPowerFrame hooks.
+	-->
+
+	<Frame name="WhoaBuilderSpenderFrame" virtual="true" mixin="WhoaBuilderSpenderMixin">
+		<Layers>
+			<Layer level="ARTWORK" textureSubLevel="0">
+				<Texture parentKey="BarTexture" file="Interface\TargetingFrame\UI-StatusBar" hidden="true"/>
+			</Layer>
+			<Layer level="ARTWORK" textureSubLevel="1">
+				<Texture file="Interface\TargetingFrame\UI-StatusBar-Glow" parentKey="LossGlowTexture" hidden="true" alphaMode="ADD"/>
+			</Layer>
+			<Layer level="ARTWORK" textureSubLevel="1">
+				<Texture file="Interface\TargetingFrame\UI-StatusBar-Glow" parentKey="GainGlowTexture" hidden="true" alphaMode="ADD" alpha="0.75"/>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad method="OnLoad"/>
+		</Scripts>
+	</Frame>
+
+	<!--
+		Full-power spike/pulse. Parent this ABOVE the unit-frame border overlay so
+		AlertSpike / BigSpikeGlow render over the chrome (not clipped under it).
+	-->
+	<Frame name="WhoaFullResourcePulseFrame" virtual="true" mixin="WhoaFullResourcePulseMixin">
+		<Size x="119" y="12"/>
+		<Frames>
+			<!-- TOPRIGHT slot matches Blizzard FullResourcePulseFrame; Lua resizes per power bar. -->
+			<Frame parentKey="SpikeFrame">
+				<Size x="119" y="12"/>
+				<Anchors>
+					<Anchor point="TOPRIGHT" x="-5" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture parentKey="BigSpikeGlow" alpha="0" alphaMode="ADD" file="Interface\TargetingFrame\UI-StatusBar-Glow">
+							<Size x="42" y="24"/>
+							<Anchors>
+								<Anchor point="RIGHT" x="21" y="0"/>
+							</Anchors>
+						</Texture>
+						<Texture parentKey="AlertSpikeStay" alpha="0" alphaMode="ADD" file="Interface\TargetingFrame\UI-StatusBar-Glow">
+							<Size x="30" y="18"/>
+							<Anchors>
+								<Anchor point="RIGHT" x="11" y="0"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Animations>
+					<AnimationGroup parentKey="SpikeAnim" setToFinalAlpha="true">
+						<Alpha childKey="BigSpikeGlow" smoothing="IN" duration="0.25" order="1" fromAlpha="0" toAlpha="1"/>
+						<Scale childKey="BigSpikeGlow" smoothing="NONE" duration="0.1" order="1" fromScaleX="0.25" fromScaleY="0.75" toScaleX="1.4" toScaleY="0.75">
+							<Origin point="LEFT"/>
+						</Scale>
+						<Scale childKey="BigSpikeGlow" startDelay="0.2" smoothing="IN" duration="0.2" order="1" fromScaleX="1" fromScaleY="1" toScaleX="0.5" toScaleY="1">
+							<Origin point="LEFT"/>
+						</Scale>
+						<Alpha childKey="BigSpikeGlow" startDelay="0.3" duration="0.25" order="1" fromAlpha="1" toAlpha="0"/>
+						<Alpha childKey="AlertSpikeStay" smoothing="IN" duration="0.25" order="1" fromAlpha="0" toAlpha="1"/>
+					</AnimationGroup>
+				</Animations>
+			</Frame>
+			<Frame parentKey="PulseFrame">
+				<Size x="119" y="12"/>
+				<Anchors>
+					<Anchor point="TOPRIGHT" x="-5" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture parentKey="YellowGlow" alpha="0" alphaMode="ADD" file="Interface\TargetingFrame\UI-StatusBar-Glow">
+							<Size x="20" y="24"/>
+							<Anchors>
+								<Anchor point="RIGHT" x="-1" y="-1"/>
+							</Anchors>
+						</Texture>
+						<Texture parentKey="SoftGlow" alpha="0" alphaMode="ADD" file="Interface\TargetingFrame\UI-StatusBar-Glow">
+							<Size x="20" y="24"/>
+							<Anchors>
+								<Anchor point="RIGHT" x="-1" y="-1"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Animations>
+					<AnimationGroup parentKey="PulseAnim" looping="REPEAT">
+						<Alpha childKey="YellowGlow" duration="0.1" order="1" fromAlpha="0" toAlpha="1"/>
+						<Translation childKey="YellowGlow" smoothing="OUT" duration="0.5" order="1" offsetX="20" offsetY="0"/>
+						<Alpha childKey="YellowGlow" startDelay="0.4" duration="0.1" order="1" fromAlpha="1" toAlpha="0"/>
+						<Alpha childKey="SoftGlow" duration="0.1" order="1" fromAlpha="0" toAlpha="1"/>
+						<Translation childKey="SoftGlow" smoothing="OUT" duration="0.7" order="1" offsetX="20" offsetY="0"/>
+						<Alpha childKey="SoftGlow" startDelay="0.6" duration="0.1" order="1" fromAlpha="1" toAlpha="0"/>
+					</AnimationGroup>
+				</Animations>
+			</Frame>
+		</Frames>
+		<Animations>
+			<AnimationGroup parentKey="FadeoutAnim" setToFinalAlpha="true">
+				<Alpha fromAlpha="1" toAlpha="0" duration="0.5" order="1"/>
+				<Scripts>
+					<OnFinished>
+						local parent = self:GetParent()
+						parent.PulseFrame.PulseAnim:Stop()
+						parent.SpikeFrame.SpikeAnim:Stop()
+					</OnFinished>
+				</Scripts>
+			</AnimationGroup>
+		</Animations>
+		<Scripts>
+			<OnLoad method="OnLoad"/>
+		</Scripts>
+	</Frame>
+
+	<StatusBar name="WhoaAnimatedHealthLossTemplate" virtual="true" mixin="WhoaAnimatedHealthLossMixin" hidden="true">
+		<BarTexture file="Interface\TargetingFrame\UI-StatusBar"/>
+		<Scripts>
+			<OnLoad method="OnLoad"/>
+		</Scripts>
+	</StatusBar>
+</Ui>

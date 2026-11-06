@@ -1,0 +1,32 @@
+# WoW client junctions / live install mirrors
+/BlizzardInterfaceCode/
+/Logs/
+
+# Dev-only (not part of the addon)
+/reference/
+/docs/
+/tools/
+
+# Pack output
+/release/
+
+# Python / PyInstaller build debris
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Converter EXE copies under Media
+/Media/taller/*.exe
+
+# Scratch / session junk
+*.log
+*.tmp
+memory.log
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+Desktop.ini
+*~
+*.swp
+*.swo

@@ -1,0 +1,104 @@
+---
+description: WhoaUnitFrames addon structure and Lua/XML conventions
+globs: "**/*.{lua,xml,toc}"
+alwaysApply: false
+---
+
+# WhoaUnitFrames Conventions
+
+## Scope
+
+- We only build **our own** unit frames (WhoaUF frames)
+- The **only** change to default Blizzard frames is **hiding + muting runtime** (UnregisterAllEvents / clear OnUpdate) and restore when disabled — centralized in `Blizzard_Classic.lua` / `Blizzard_Mainline.lua` (TOC loads one)
+- Do not skin, restyle, move, secure-hook behavior, or otherwise customize stock Player/Target/Focus/party/raid/CUF frames
+- Reference Blizzard code to learn patterns; implement equivalents on Whoa frames only
+- **Flavor separation**: Edit Mode, Blizzard mute, and cast bars are Classic vs Mainline files. Do not add `if IsMainline()` branches into the other flavor’s file — edit the matching `*_Classic` / `*_Mainline` module. Mainline must never mute/hook `PartyFrame` / Compact CUF (exception: `PartyFrame.MemberFrame1-4` + `PartyFrame.Background` get alpha 0 + mouse off + a `hooksecurefunc` `SetAlpha` re-zero, via field reads only — `ConcealStockParty` in `Blizzard_Mainline.lua`), must never call `EditModeManagerFrame:` methods or global `ShouldShowPartyFrames()`, and must never write `EditModeManagerFrame.registeredSystemFrames` or `Show`/`SetShown`/`Hide` slots on stock frames (secret `oldR`); Classic may. Mainline conceals stock frames with `SetAlpha(0)` + `EnableMouse(false)` + `UnregisterAllEvents` only — never call `Hide`/`Show`/`SetParent`/`OnLoad` on them (OnHide/OnShow/OnLoad run Blizzard Lua under Whoa taint → Edit Mode `UpdateSystems` → combat `SetClampRectInsets` block).
+
+## Mainline builds: live retail vs PTR (xptr)
+
+Live `_retail_` and `_xptr_` are **both** `WOW_PROJECT_MAINLINE`. `IsMainline()` / `AllowLoadGameType mainline` cannot separate them. Treat them as two Mainline **builds** that must not assume each other’s APIs.
+
+| Build | Typical Interface | Example APIs |
+|-------|-------------------|--------------|
+| Live retail | `120100` | No `UnitFrameUtil`; older AuraContainer |
+| PTR / post–12.1.5 | `120105+` | `UnitFrameUtil`, pandemic/caster aura helpers, `SetRoundLayoutToNearestPixel`, … |
+
+**Rules**
+
+- Do **not** invent `*_PTR` / `*_Retail` module families for this split unless a surface truly diverges a lot
+- Gate inside existing Mainline / shared modules by **capability** first: `if UnitFrameUtil and UnitFrameUtil.UpdateUnitPvPIndicator then … else … end`
+- Optional build floor when needed: `select(4, GetBuildInfo())` / `Timing.tocVersion >= 120105` (same destructure pattern as `Core/Timing.lua` / `Core/Util.lua` — do not `select(4, …)` alone if the client returns extra values)
+- Always keep a retail-safe fallback so missing globals never error on live
+- List both Interface versions on Mainline TOCs (`120100, 120105`, …) so one addon loads on both clients
+- Live Classic TOCs only: Vanilla / TBC / Mists (no Wrath / Cata Classic)
+- When 12.1.5 ships to live, capability checks stay true; delete obsolete fallbacks in a dedicated cleanup pass
+- Never call PTR-only APIs from Classic-only files
+
+## Terminology (do not mix)
+
+| Term | Meaning |
+|------|---------|
+| **Blizzard / default UI** | Vanilla client frames (`PlayerFrame`, `TargetFrame`, `FocusFrame`, …). We hide + mute these in `Blizzard_*.lua`. |
+| **Whoa frames** | Our replacements (`WhoaUFPlayerFrame`, `WhoaUFTargetFrame`, …). All product behavior lives here. |
+| **Mainline flavor** | Retail + PTR (`WOW_PROJECT_MAINLINE`); use `*_Mainline` TOC modules. |
+| **Mainline build** | A specific Interface within Mainline (e.g. live `120100` vs PTR `120105`); gate with API presence / TOC version, not project ID. |
+
+## End goal: clone defaults in stages
+
+- **Target product**: Whoa frames that match default Blizzard unit-frame visuals and behavior (player / target / ToT / focus / etc.), not a custom redesign
+- **Why stages**: isolate **taint** as each surface is added (layout → secure unit buttons → events → auras → cast/threat/etc.)
+- Prefer small, reviewable increments over large ports of Blizzard files
+- After each stage: `/reload`, exercise the new surface in and out of combat, watch for tainted execution / blocked secure actions
+- Do not copy Blizzard files wholesale; mirror structure/APIs onto Whoa-named frames/modules
+- Temporary scaffolds are OK early, but steer each stage toward Blizzard parity (art, layout, secure patterns from `reference/`)
+
+## Project layout
+
+```
+WhoaUnitFrames.toc          # load order (paths relative to addon root)
+Options.lua                 # settings / slash commands
+Core/                       # bootstrap, colors, Blizzard hide/mute, class-bar registry, EventBus
+  WhoaUnitFrames.lua
+  EventBus.lua
+  Util.lua
+  Blizzard_Classic.lua / Blizzard_Mainline.lua   # TOC loads one
+  EditMode_Classic.lua / EditMode_Mainline.lua   # TOC loads one
+  Appearance.lua
+  SpellbarArt_Classic.lua / SpellbarArt_Mainline.lua   # TOC loads one
+  ClassBars.lua
+Frames/                     # unit frame surfaces + modular split
+  StatusBarAnim.lua
+  UnitFrameState.lua        # WhoaUF._UF shared state
+  UnitFrameShared.lua       # helpers (life status, hit rects, bar setup)
+  UnitFrameUpdate.lua       # UpdateUnitFrame pipeline
+  UnitFrameEvents.lua       # event watcher
+  UnitFrameCombatFlush.lua  # combat deferred flush
+  UnitFrame.lua             # create / vehicle / visibility / init
+  Threat.lua                # shared threat + ToT spellbar position
+  CastBar_Classic.lua / CastBar_Mainline.lua     # TOC loads one
+  Auras.lua, Pet.lua, Party.lua, …
+ClassPower/                 # class-gated at file top; register via ClassBars
+Media/                      # addon textures
+docs/architecture.md        # module map for contributors/agents
+reference/                  # read-only Blizzard source — never edit as product code
+```
+
+- Global namespace: `WhoaUF`; saved vars: `WhoaUFDB`
+- Dev controls (enable, force-show, mem/CPU, error logging): sibling **`../DevTools`** (`/whoadev`). DevTools = HUD checkboxes only; logic stays in WhoaUF setters / Apply*. Register via `RegisterDevToolsProvider` — never Settings Developer subcategory
+- New modules: put frame surfaces in `Frames/`, class resources in `ClassPower/`, shared bootstrap in `Core/`; always add the path to `WhoaUnitFrames.toc`
+
+## Coding style
+
+- Match existing Lua style: locals at top, `WhoaUF:` methods, minimal globals
+- Guard combat-sensitive UI changes with `InCombatLockdown()` and defer until safe
+- Prefer Blizzard Settings API / `EventUtil` patterns already used in the addon
+- Keep Classic multi-client compatibility (TOC Interface list); check reference before assuming an API exists on all flavors
+- Keep Mainline live + PTR compatible: capability-gate build-specific APIs; list both Interface versions on Mainline TOCs
+- Avoid taint vectors: no insecure writes to secure frames/attributes in combat; no hooking protected Blizzard unit-frame methods; keep Whoa logic on Whoa frames
+
+## When implementing unit frames
+
+1. Search unit-frame reference packages first (see blizzard-reference rule)
+2. Adapt Blizzard secure frame / unit attribute patterns onto **new Whoa frames**
+3. Touch default frames only via hide/mute/restore in `Blizzard_Classic.lua` / `Blizzard_Mainline.lua`
+4. Add one feature layer at a time so a new taint source is attributable to that change

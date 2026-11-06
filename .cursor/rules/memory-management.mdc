@@ -1,0 +1,27 @@
+---
+description: Memory discipline for WhoaUnitFrames
+alwaysApply: true
+---
+
+# Memory management
+
+## Coding rules
+
+- Reuse tables: `wipe(t)` / fill existing tables; avoid `{}` in `OnUpdate`, aura loops, and per-event hot paths
+- Prefer frame/object pools over repeated `CreateFrame`
+- Cancel tickers/timers and clear unit/event registrations when features disable
+- Do not retain large caches (GUID maps, aura snapshots, nameplates) without an explicit prune path
+- Avoid building strings with `..` in hot paths; use `string.format` sparingly and cache constants
+- Locals over globals; do not grow `WhoaUFDB` with unbounded dumps
+- Do not call `collectgarbage` on timers or every frame update
+- Idle collect only via `WhoaUF:RequestIdleCollect` on clear/hide moments (no target/focus/ToT, aura clear when unit gone, pet dismissed, party hide/shrink, leave combat, addon disable): deferred next frame, skipped in combat, throttled (leave-combat / disable may force)
+
+## Monitor / error logging / force-show (`DevTools`)
+
+Dev HUD lives in sibling **`../DevTools`**. DevTools is **controls only** — no WhoaUF business logic.
+
+- Namespace: `WhoaDev` (alias `DevTools`); SavedVariables: `DevToolsDB`
+- WhoaUnitFrames registers via `WhoaUF:RegisterDevToolsProvider()` (`OptionalDeps: DevTools`) with `registerHud` checkboxes that call WhoaUF setters (`SetEnabled`, `SetForceShow*`, …)
+- Mem/CPU samples **`WhoaUnitFrames` only** — never DevTools' own usage
+- Slash `/whoadev` to toggle HUD; `/whoadev reset` peaks; `/whoadev logs` for log status
+- Do **not** put enable / force-show / error-logging / monitor toggles in Whoa Settings (`Options.lua`)
