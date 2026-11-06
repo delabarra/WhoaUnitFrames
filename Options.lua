@@ -10,7 +10,23 @@ function WhoaUF:RegisterOptions()
 	if self.MigrateFrameStyleOptions then
 		self:MigrateFrameStyleOptions(db)
 	end
-	local category, layout = Settings.RegisterVerticalLayoutCategory("Whoa Unit Frames")
+	-- Canvas category so Settings search never walks our controls. Addon vertical layouts
+	-- taint FindInitializersMatchingSearchText; stock Social Discord Init then hits
+	-- forbidden C_Discord.IsUserOAuthed() (e.g. search "con" matches DISCONNECT).
+	local layout = CreateVerticalLayout()
+	local canvas = CreateFrame("Frame", "WhoaUFSettingsCanvas", nil, "SettingsListTemplate")
+	canvas.Header.Title:SetText("Whoa Unit Frames")
+	canvas.Header.DefaultsButton:Hide()
+	canvas.Header.TutorialButton:Hide()
+	function canvas:OnRefresh()
+		self:Display(layout:GetInitializers())
+	end
+	local category, canvasLayout = Settings.RegisterCanvasLayoutCategory(canvas, "Whoa Unit Frames")
+	-- SetParentInitializer → IsParentInitializerInLayout calls currentLayout:EnumerateInitializers().
+	-- Canvas layouts lack that; keep layoutType=Canvas (search skip) but forward the list.
+	function canvasLayout:EnumerateInitializers()
+		return layout:EnumerateInitializers()
+	end
 
 	-- Track Settings variables so ResetOptionsToDefaults can refresh the panel UI.
 	-- WHOAUF_STATUS_TEXT is a Blizzard CVar — intentionally not tracked.
@@ -42,6 +58,23 @@ function WhoaUF:RegisterOptions()
 			trackedVars[#trackedVars + 1] = variable
 		end
 		return WithOwnedCallbacks(Settings.RegisterProxySetting(cat, variable, ...))
+	end
+
+	-- Settings.Create* appends via GetLayout(category); canvas layouts have no AddInitializer.
+	local function CreateCheckbox(cat, setting, tooltip)
+		local initializer = Settings.CreateCheckboxInitializer(setting, nil, tooltip)
+		layout:AddInitializer(initializer)
+		return initializer
+	end
+	local function CreateSlider(cat, setting, options, tooltip)
+		local initializer = Settings.CreateSliderInitializer(setting, options, tooltip)
+		layout:AddInitializer(initializer)
+		return initializer
+	end
+	local function CreateDropdown(cat, setting, options, tooltip)
+		local initializer = Settings.CreateDropdownInitializer(setting, options, tooltip)
+		layout:AddInitializer(initializer)
+		return initializer
 	end
 
 	local function IsPlayerClass(classToken)
@@ -84,7 +117,7 @@ function WhoaUF:RegisterOptions()
 	end
 
 	local function CreateLoopingDropdown(cat, setting, optionsFn, tooltip)
-		local initializer = Settings.CreateDropdown(cat, setting, optionsFn, tooltip)
+		local initializer = CreateDropdown(cat, setting, optionsFn, tooltip)
 		EnableLoopingDropdown(setting)
 		return initializer
 	end
@@ -548,7 +581,7 @@ function WhoaUF:RegisterOptions()
 	frameScaleOptions:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, function(value)
 		return string.format("%d%%", value)
 	end)
-	Settings.CreateSlider(
+	CreateSlider(
 		category,
 		frameScaleSetting,
 		frameScaleOptions,
@@ -747,7 +780,7 @@ function WhoaUF:RegisterOptions()
 			end)
 		end
 	else
-		customHealthInitializer = Settings.CreateCheckbox(category, customHealthSetting, customHealthTooltip)
+		customHealthInitializer = CreateCheckbox(category, customHealthSetting, customHealthTooltip)
 		layout:AddInitializer(CreateSettingsButtonInitializer(
 			"Health bar color",
 			"Pick…",
@@ -771,7 +804,7 @@ function WhoaUF:RegisterOptions()
 			OnHealthColorSettingChanged()
 		end
 	)
-	local customPlayerOnlyInitializer = Settings.CreateCheckbox(
+	local customPlayerOnlyInitializer = CreateCheckbox(
 		category,
 		customPlayerOnlySetting,
 		"On: custom color applies only to your player frame. Off: also target, focus, ToT, and pet. Never party or boss."
@@ -823,7 +856,7 @@ function WhoaUF:RegisterOptions()
 		end
 		return string.format("%.1fs", seconds)
 	end)
-	local cycleSpeedInitializer = Settings.CreateSlider(
+	local cycleSpeedInitializer = CreateSlider(
 		category,
 		cycleSpeedSetting,
 		cycleSpeedOptions,
@@ -872,7 +905,7 @@ function WhoaUF:RegisterOptions()
 			customPlayerS:SetValue(self:GetColorOption("customHealthColorPlayerOnly", false) and true or false)
 		end
 	end)
-	Settings.CreateCheckbox(
+	CreateCheckbox(
 		category,
 		colorsLocalSetting,
 		"Off (default): color options apply to every character. On: this character keeps its own color choices."
@@ -1095,7 +1128,7 @@ function WhoaUF:RegisterOptions()
 	end)
 	local auraSizeOptions = Settings.CreateSliderOptions(auraMinSize, auraMaxSize, 1)
 	auraSizeOptions:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, tostring)
-	Settings.CreateSlider(
+	CreateSlider(
 		category,
 		auraSizeSetting,
 		auraSizeOptions,
@@ -1230,7 +1263,7 @@ function WhoaUF:RegisterOptions()
 			db[varName] = value and true or false
 			onChanged()
 		end)
-		Settings.CreateCheckbox(category, setting, tooltip)
+		CreateCheckbox(category, setting, tooltip)
 		return setting
 	end
 
@@ -1331,7 +1364,7 @@ function WhoaUF:RegisterOptions()
 	welcomeSetting:SetValueChangedCallback(function(_, value)
 		db.hideWelcome = value and true or false
 	end)
-	Settings.CreateCheckbox(
+	CreateCheckbox(
 		category,
 		welcomeSetting,
 		"Don't show the Whoa welcome toast after you log in."
