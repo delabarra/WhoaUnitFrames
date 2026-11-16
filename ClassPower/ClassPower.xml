@@ -1,0 +1,243 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+	<!--
+		Whoa class-power chrome (virtual templates).
+		Reference: Stock/Blizzard_UnitFrame/<flavor>/*.xml
+		Lua modules create frames from these templates; logic stays in ClassPower/*.lua.
+	-->
+
+	<!-- Warlock soul shard (Cata/Mists ShardBar.xml ShardTemplate) -->
+	<Frame name="WhoaUFShardTemplate" virtual="true">
+		<Size x="52" y="29"/>
+		<Animations>
+			<AnimationGroup parentKey="animIn">
+				<Alpha target="$parentFill" fromAlpha="0" toAlpha="1" duration="0.2" order="1"/>
+				<Alpha target="$parentGlow" fromAlpha="0" toAlpha="1" duration="0.2" order="1"/>
+				<Alpha target="$parentGlow" fromAlpha="0" toAlpha="1" duration="0.1" order="2"/>
+				<Scripts>
+					<OnPlay>
+						local parent = self:GetParent();
+						parent.shardFill:SetAlpha(0.0);
+						parent.shardFill:Show();
+						parent.shardGlow:SetAlpha(0);
+					</OnPlay>
+					<OnFinished>
+						local parent = self:GetParent();
+						parent.shardFill:SetAlpha(1.0);
+						parent.shardGlow:SetAlpha(0);
+					</OnFinished>
+				</Scripts>
+			</AnimationGroup>
+			<AnimationGroup parentKey="animOut">
+				<Alpha target="$parentFill" fromAlpha="1" toAlpha="0" duration="0.2" order="1"/>
+				<Alpha target="$parentSmokeA" fromAlpha="0" toAlpha="1" duration="0.1" order="1"/>
+				<Alpha target="$parentSmokeB" fromAlpha="0" toAlpha="1" duration="0.1" order="1"/>
+				<Rotation target="$parentSmokeA" duration="0.3" order="1" degrees="63"/>
+				<Rotation target="$parentSmokeB" duration="0.4" order="1" degrees="-52"/>
+				<Scale target="$parentSmokeA" fromScaleX="1.0" fromScaleY="1.0" toScaleX="1.2" toScaleY="1.2" duration="0.3" order="1"/>
+				<Scale target="$parentSmokeB" fromScaleX="1.2" fromScaleY="1.2" toScaleX="2.5" toScaleY="2.5" duration="0.4" order="1"/>
+				<Alpha target="$parentSmokeA" fromAlpha="1" toAlpha="0" duration="0.25" order="2"/>
+				<Alpha target="$parentSmokeB" fromAlpha="1" toAlpha="0" duration="0.25" order="2"/>
+				<Scale target="$parentSmokeA" fromScaleX="2.5" fromScaleY="2.5" toScaleX="0.4" toScaleY="0.4" duration="0.25" order="2"/>
+				<Scale target="$parentSmokeB" fromScaleX="2.5" fromScaleY="2.5" toScaleX="0.4" toScaleY="0.4" duration="0.25" order="2"/>
+				<Scripts>
+					<OnFinished>
+						self:GetParent().shardFill:Hide();
+					</OnFinished>
+				</Scripts>
+			</AnimationGroup>
+		</Animations>
+		<Layers>
+			<Layer level="OVERLAY">
+				<Texture name="$parentGlow" file="Interface\PlayerFrame\UI-WarlockShard" parentKey="shardGlow" alphaMode="ADD" alpha="0">
+					<Size x="26" y="23"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="-2" y="1"/>
+					</Anchors>
+					<TexCoords left="0.01562500" right="0.42187500" top="0.14843750" bottom="0.32812500"/>
+				</Texture>
+				<Texture name="$parentSmokeA" file="Interface\PlayerFrame\UI-WarlockShard" parentKey="shardSmokeA">
+					<Size x="32" y="32"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="-8" y="5"/>
+					</Anchors>
+					<TexCoords left="0.01562500" right="0.51562500" top="0.34375000" bottom="0.59375000"/>
+				</Texture>
+				<Texture name="$parentSmokeB" file="Interface\PlayerFrame\UI-WarlockShard" parentKey="shardSmokeB">
+					<Size x="32" y="32"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentSmokeA"/>
+					</Anchors>
+					<TexCoords right="0.01562500" left="0.51562500" bottom="0.34375000" top="0.59375000"/>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture name="$parentFill" file="Interface\PlayerFrame\UI-WarlockShard" parentKey="shardFill">
+					<Size x="17" y="16"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="3" y="-2"/>
+					</Anchors>
+					<TexCoords left="0.01562500" right="0.28125000" top="0.00781250" bottom="0.13281250"/>
+				</Texture>
+			</Layer>
+			<Layer level="BORDER">
+				<Texture file="Interface\PlayerFrame\UI-WarlockShard">
+					<Size x="52" y="29"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="-5" y="3"/>
+					</Anchors>
+					<TexCoords left="0.01562500" right="0.82812500" top="0.60937500" bottom="0.83593750"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				self.shardFill:Hide();
+				self.shardGlow:SetAlpha(0.0);
+				self.shardSmokeA:SetAlpha(0.0);
+				self.shardSmokeB:SetAlpha(0.0);
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
+	<!-- MoP Destruction Burning Ember (Mists ShardBar.xml BurningEmberTemplate) -->
+	<Frame name="WhoaUFBurningEmberTemplate" virtual="true">
+		<Size x="36" y="39"/>
+		<Animations>
+			<AnimationGroup parentKey="animIn">
+				<Alpha target="$parentGlow" fromAlpha="0" toAlpha="1" duration="0.1" order="1"/>
+				<Alpha target="$parentGlow2" fromAlpha="0" toAlpha="1" duration="0.1" order="1"/>
+				<Alpha target="$parentGlow" fromAlpha="1" toAlpha="0" duration="0.15" order="2"/>
+				<Alpha target="$parentGlow2" fromAlpha="1" toAlpha="0" duration="0.15" order="2"/>
+				<Scripts>
+					<OnFinished>
+						local parent = self:GetParent();
+						parent.glow:SetAlpha(0.0);
+						parent.glow2:SetAlpha(0.0);
+					</OnFinished>
+				</Scripts>
+			</AnimationGroup>
+			<AnimationGroup parentKey="animOut">
+				<Alpha target="$parentGlow" fromAlpha="0" toAlpha="1" duration="0.1" order="1"/>
+				<Alpha target="$parentGlow2" fromAlpha="0" toAlpha="1" duration="0.1" order="1"/>
+				<Alpha target="$parentGlow" fromAlpha="1" toAlpha="0" duration="0.15" order="2"/>
+				<Alpha target="$parentGlow2" fromAlpha="1" toAlpha="0" duration="0.15" order="2"/>
+				<Scripts>
+					<OnFinished>
+						local parent = self:GetParent();
+						parent.glow:SetAlpha(0.0);
+						parent.glow2:SetAlpha(0.0);
+					</OnFinished>
+				</Scripts>
+			</AnimationGroup>
+		</Animations>
+		<Layers>
+			<Layer level="BORDER">
+				<Texture parentKey="border" file="Interface\PlayerFrame\Warlock-DestructionUI" setAllPoints="true">
+					<TexCoords left="0.15234375" right="0.29296875" top="0.32812500" bottom="0.93750000"/>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture name="$parentFill" file="Interface\PlayerFrame\Warlock-DestructionUI" parentKey="fill">
+					<Size x="20" y="22"/>
+					<Anchors>
+						<Anchor point="BOTTOM" x="0" y="7"/>
+					</Anchors>
+					<TexCoords left="0.30078125" right="0.37890625" top="0.32812500" bottom="0.67187500"/>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK" textureSubLevel="1">
+				<Texture name="$parentFire" file="Interface\PlayerFrame\Warlock-DestructionUI" setAllPoints="true" parentKey="fire" hidden="true">
+					<TexCoords left="0.00390625" right="0.14453125" top="0.32812500" bottom="0.93750000"/>
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY">
+				<Texture name="$parentGlow" file="Interface\PlayerFrame\Warlock-DestructionUI" setAllPoints="true" parentKey="glow" alpha="0" alphaMode="ADD">
+					<TexCoords left="0.00390625" right="0.14453125" top="0.32812500" bottom="0.93750000"/>
+				</Texture>
+				<Texture name="$parentGlow2" file="Interface\PlayerFrame\Warlock-DestructionUI" setAllPoints="true" parentKey="glow2" alpha="0" alphaMode="ADD">
+					<TexCoords left="0.00390625" right="0.14453125" top="0.32812500" bottom="0.93750000"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				self.fill:Hide();
+				self.fire:Hide();
+				self.glow:SetAlpha(0.0);
+				self.glow2:SetAlpha(0.0);
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
+	<!-- Paladin holy-power rune (Mists PaladinPowerBar.xml rune frames).
+	     Texture must fill the sized rune frame (no lone TOPLEFT — that uses the
+	     full 256x128 atlas and looks like a huge offset glow). -->
+	<Frame name="WhoaUFHolyPowerRuneTemplate" virtual="true" alpha="0">
+		<Animations>
+			<AnimationGroup parentKey="activate">
+				<Alpha fromAlpha="0" toAlpha="1" duration="0.2" order="1"/>
+				<Scripts>
+					<OnFinished>
+						self:GetParent():SetAlpha(1);
+					</OnFinished>
+				</Scripts>
+			</AnimationGroup>
+			<AnimationGroup parentKey="deactivate">
+				<Alpha fromAlpha="1" toAlpha="0" duration="0.3" order="1"/>
+				<Scripts>
+					<OnFinished>
+						self:GetParent():SetAlpha(0);
+					</OnFinished>
+				</Scripts>
+			</AnimationGroup>
+		</Animations>
+		<Layers>
+			<Layer level="OVERLAY">
+				<Texture name="$parentTexture" file="Interface\PlayerFrame\PaladinPowerTextures" parentKey="Texture" setAllPoints="true"/>
+			</Layer>
+		</Layers>
+	</Frame>
+
+	<!-- Monk chi orb (Mists MonkHarmonyBar.xml MonkLightEnergyTemplate) -->
+	<Frame name="WhoaUFMonkChiOrbTemplate" virtual="true">
+		<Size x="18" y="17"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture file="Interface\PlayerFrame\MonkUI">
+					<Size x="21" y="21"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+					<TexCoords left="0.09375000" right="0.17578125" top="0.71093750" bottom="0.87500000"/>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture name="$parentGlow" file="Interface\PlayerFrame\MonkUI" parentKey="glow" alpha="0">
+					<Size x="21" y="21"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+					<TexCoords left="0.00390625" right="0.08593750" top="0.71093750" bottom="0.87500000"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Animations>
+			<AnimationGroup parentKey="activate">
+				<Alpha target="$parentGlow" fromAlpha="0" toAlpha="1" duration="0.2" order="1"/>
+				<Scripts>
+					<OnFinished>
+						self:GetParent().glow:SetAlpha(1);
+					</OnFinished>
+				</Scripts>
+			</AnimationGroup>
+			<AnimationGroup parentKey="deactivate">
+				<Alpha target="$parentGlow" fromAlpha="1" toAlpha="0" duration="0.3" order="1"/>
+				<Scripts>
+					<OnFinished>
+						self:GetParent().glow:SetAlpha(0);
+					</OnFinished>
+				</Scripts>
+			</AnimationGroup>
+		</Animations>
+	</Frame>
+</Ui>

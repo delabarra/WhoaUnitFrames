@@ -1,0 +1,50 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+	<ContainedAlertFrame name="WhoaToastFrame" inherits="SocialToastTemplate" frameStrata="LOW" mixin="WhoaToastMixin">
+		<Anchors>
+			<Anchor point="CENTER" x="0" y="50"/>
+		</Anchors>
+		<Layers>
+			<Layer level="BORDER">
+				<Texture name="$parentIconTexture" parentKey="IconTexture" file="Interface\FriendsFrame\UI-Toast-ToastIcons">
+					<Size x="40" y="40"/>
+					<Anchors>
+						<Anchor point="LEFT" x="4" y="0"/>
+					</Anchors>
+					<TexCoords left="0" right="0.25" top="0" bottom="0.5"/>
+				</Texture>
+				<FontString name="$parentTopLine" parentKey="TopLine" inherits="FriendsFont_Normal" justifyH="LEFT" justifyV="TOP" nonspacewrap="true">
+					<Size x="0" y="0"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="44" y="-10"/>
+						<Anchor point="RIGHT" x="-20" y="0"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentMiddleLine" parentKey="MiddleLine" inherits="FriendsFont_Normal" justifyH="LEFT" justifyV="TOP" nonspacewrap="true">
+					<Size x="0" y="0"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.TopLine" relativePoint="BOTTOMLEFT" x="0" y="-4"/>
+						<Anchor point="RIGHT" x="-20" y="0"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentBottomLine" parentKey="BottomLine" inherits="FriendsFont_Normal" justifyH="LEFT" justifyV="TOP" nonspacewrap="true">
+					<Size x="0" y="0"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.TopLine" relativePoint="BOTTOMLEFT" x="0" y="-4"/>
+						<Anchor point="RIGHT" x="-20" y="0"/>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentDoubleLine" parentKey="DoubleLine" inherits="FriendsFont_Normal" justifyH="LEFT" justifyV="TOP" nonspacewrap="true">
+					<Size x="0" y="0"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.BottomLine" relativePoint="BOTTOMLEFT" x="0" y="-4"/>
+						<Anchor point="RIGHT" x="-20" y="0"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad inherit="prepend" method="OnLoad"/>
+			<OnHide method="OnHide"/>
+		</Scripts>
+	</ContainedAlertFrame>
+</Ui>

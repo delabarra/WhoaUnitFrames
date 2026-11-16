@@ -1,0 +1,127 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+	<!--
+		Classic base geometry for Whoa unit frames (Stage B).
+		Mirrors Blizzard PlayerFrame.xml / TargetFrame.xml anchors.
+		Whoa/thick style deltas are applied in Lua (Appearance.lua); minus/critter
+		always restores this classic target layout via ApplyTargetClassificationChrome.
+	-->
+
+	<Button name="WhoaUFClassicPlayerButtonTemplate" virtual="true" inherits="SecureUnitButtonTemplate" frameStrata="LOW">
+		<Size x="232" y="100"/>
+		<HitRectInsets>
+			<AbsInset left="21" right="19" top="12" bottom="15"/>
+		</HitRectInsets>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="Background">
+					<Size x="119" y="41"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="89.5" y="-26"/>
+					</Anchors>
+					<Color r="0" g="0" b="0" a="0.5"/>
+				</Texture>
+			</Layer>
+			<Layer level="BORDER">
+				<Texture parentKey="NameBackground" file="Interface\TargetingFrame\UI-TargetingFrame-LevelBackground" hidden="true">
+					<Size x="119" y="19"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="90" y="-26"/>
+					</Anchors>
+				</Texture>
+				<Texture parentKey="Portrait">
+					<Size x="64" y="64"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="24" y="-16"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Frame parentKey="Overlay" setAllPoints="true">
+				<Layers>
+					<Layer level="BORDER">
+						<Texture parentKey="FrameTexture" file="Interface\TargetingFrame\UI-TargetingFrame">
+							<Size x="193" y="77"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+							<TexCoords left="0.85546875" right="0.1015625" top="0.0625" bottom="0.6640625"/>
+						</Texture>
+						<Texture parentKey="VehicleTexture" file="Interface\Vehicles\UI-Vehicle-Frame" hidden="true">
+							<Size x="240" y="120"/>
+							<Anchors>
+								<Anchor point="CENTER" x="4" y="-4"/>
+							</Anchors>
+						</Texture>
+						<FontString parentKey="Name" inherits="GameFontNormalSmall">
+							<Size x="100" y="12"/>
+							<Anchors>
+								<Anchor point="CENTER" x="34" y="15"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+			</Frame>
+			<!-- Health / Power: UnitFrame.lua CreateTemplateBars (TextStatusBar OnLoad taints on Mainline). -->
+		</Frames>
+	</Button>
+
+	<Button name="WhoaUFClassicTargetButtonTemplate" virtual="true" inherits="SecureUnitButtonTemplate" frameStrata="LOW">
+		<Size x="232" y="100"/>
+		<HitRectInsets>
+			<AbsInset left="19" right="21" top="12" bottom="15"/>
+		</HitRectInsets>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="Background">
+					<Size x="119" y="41"/>
+					<Anchors>
+						<Anchor point="TOPRIGHT" x="-89.5" y="-26"/>
+					</Anchors>
+					<Color r="0" g="0" b="0" a="0.5"/>
+				</Texture>
+			</Layer>
+			<Layer level="BORDER">
+				<Texture parentKey="NameBackground" file="Interface\TargetingFrame\UI-TargetingFrame-LevelBackground">
+					<Size x="119" y="19"/>
+					<Anchors>
+						<Anchor point="TOPRIGHT" x="-90" y="-26"/>
+					</Anchors>
+				</Texture>
+				<Texture parentKey="Portrait">
+					<Size x="64" y="64"/>
+					<Anchors>
+						<Anchor point="TOPRIGHT" x="-24" y="-16"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Frame parentKey="Overlay" setAllPoints="true">
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture parentKey="FrameTexture" file="Interface\TargetingFrame\UI-TargetingFrame">
+							<Size x="230" y="99"/>
+							<Anchors>
+								<Anchor point="CENTER" x="18.5" y="-4"/>
+							</Anchors>
+							<TexCoords left="0.1015625" right="1.0" top="0.0078125" bottom="0.78125"/>
+						</Texture>
+						<FontString parentKey="Name" inherits="GameFontNormalSmall">
+							<Size x="100" y="12"/>
+							<Anchors>
+								<Anchor point="CENTER" x="-34" y="15"/>
+							</Anchors>
+						</FontString>
+						<FontString parentKey="Level" inherits="GameNormalNumberFont" justifyH="CENTER" justifyV="MIDDLE">
+							<Anchors>
+								<Anchor point="CENTER" relativePoint="BOTTOMRIGHT" x="-35.25" y="30"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+			</Frame>
+			<!-- Health / Power: UnitFrame.lua CreateTemplateBars (TextStatusBar OnLoad taints on Mainline). -->
+		</Frames>
+	</Button>
+</Ui>
