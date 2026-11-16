@@ -8,9 +8,11 @@ name: Release
 #   bump:          release | patch | hotfix   (version numbers)
 #   release_type:  alpha | beta | release    (CurseForge file type)
 #
+# Flow (one CurseForge upload per release):
+#   workflow_dispatch → bump TOCs, commit, push tag → then package
+#   push v* tag (human) → package only
 # Version shape: 10.0  (hotfix omitted) → 10.0.1 only when hotfix bumped
 # First manual run (no v* tags yet): tags TOC as-is (e.g. 10.2), ignores bump
-# Tag push (v10.0, v10.0-beta, ...) still packs without bumping
 on:
   workflow_dispatch:
     inputs:
@@ -41,17 +43,16 @@ permissions:
   contents: write
 
 jobs:
-  release:
-    # Skip duplicate run when this workflow pushes a tag after a manual release.
-    if: github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]'
+  # Manual only: bump version, commit, push branch + tag (no packager).
+  bump:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Bump version, update TOCs, tag
-        if: github.event_name == 'workflow_dispatch'
+      - name: Bump version, update TOCs, push tag
         env:
           BUMP: ${{ inputs.bump }}
           RELEASE_TYPE: ${{ inputs.release_type }}
@@ -107,6 +108,11 @@ jobs:
           tag="v${tag_ver}"
           echo "New version: $ver  tag: $tag  curse type: $RELEASE_TYPE"
 
+          if git ls-remote --tags origin "refs/tags/${tag}" | grep -q .; then
+            echo "Tag ${tag} already exists on remote; refuse to republish"
+            exit 1
+          fi
+
           for toc in WhoaUnitFrames.toc WhoaUnitFrames_*.toc; do
             [ -f "$toc" ] || continue
             sed -i -E "s/^## Version:.*/## Version: ${ver}/" "$toc"
@@ -120,18 +126,26 @@ jobs:
           fi
           git tag -a "$tag" -m "$tag"
 
-          echo "PUSH_TAG=$tag" >> "$GITHUB_ENV"
-          echo "PUSH_BRANCH=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
+          # Push tag before packager so the GitHub Release does not create it first.
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git push origin "refs/tags/${tag}"
+
+  # Package once: after a successful manual bump, or on a human-pushed v* tag.
+  package:
+    needs: bump
+    if: |
+      always() && !cancelled() && (
+        (github.event_name == 'workflow_dispatch' && needs.bump.result == 'success') ||
+        (github.event_name == 'push' && github.actor != 'github-actions[bot]')
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Package and upload
         uses: BigWigsMods/packager@v2
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Push version commit and tag
-        if: github.event_name == 'workflow_dispatch' && env.PUSH_TAG != ''
-        run: |
-          set -euo pipefail
-          git push origin "HEAD:${PUSH_BRANCH}"
-          git push origin "refs/tags/${PUSH_TAG}"
